@@ -1,0 +1,1862 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مخيّم الاستدراك — جذور</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f8f9f5;
+        --surface: #ffffff;
+        --green-main: #4a7c2e;
+        --green-dark: #2e5219;
+        --green-light: #eaf2e3;
+        --green-border: #c8ddb8;
+        --brown-main: #7b4b2a;
+        --brown-light: #f5ede6;
+        --brown-border: #e0cdbf;
+        --success-main: #4a7c2e;
+        --success-light: #eaf2e3;
+        --text-dark: #1e1b22;
+        --text-muted: #6e6877;
+        --border-subtle: #e5e8df;
+        --radius-lg: 24px;
+        --radius-md: 16px;
+        --radius-sm: 10px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Tajawal", sans-serif;
+        background: var(--bg);
+        color: var(--text-dark);
+        min-height: 100vh;
+        padding: 0 16px 80px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .screen-glow {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      .screen-glow.active {
+        animation: edgeGlow 0.8s ease-out;
+      }
+      @keyframes edgeGlow {
+        0% {
+          box-shadow: inset 0 0 0px 0px rgba(74, 124, 46, 0);
+        }
+        30% {
+          box-shadow: inset 0 0 50px 15px rgba(74, 124, 46, 0.4);
+        }
+        100% {
+          box-shadow: inset 0 0 0px 0px rgba(74, 124, 46, 0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        pointer-events: none;
+        width: 90%;
+        max-width: 400px;
+      }
+      .toast {
+        background: linear-gradient(135deg, #4a7c2e 0%, #2e5219 100%);
+        color: #fff;
+        padding: 14px 28px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 15px;
+        box-shadow: 0 10px 30px rgba(74, 124, 46, 0.4);
+        animation:
+          slideDownToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+          fadeOutToast 0.4s ease 7s forwards;
+        text-align: center;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        width: 100%;
+      }
+      @keyframes slideDownToast {
+        from {
+          opacity: 0;
+          transform: translateY(-30px) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      @keyframes fadeOutToast {
+        to {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.9);
+        }
+      }
+
+      .setup-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(46, 82, 25, 0.85);
+        backdrop-filter: blur(15px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        opacity: 1;
+        transition: opacity 0.6s ease;
+      }
+      .setup-modal.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .modal-content {
+        background: var(--surface);
+        width: 100%;
+        max-width: 950px;
+        max-height: 90vh;
+        border-radius: var(--radius-lg);
+        padding: 35px;
+        box-shadow:
+          0 30px 60px rgba(0, 0, 0, 0.4),
+          0 0 0 2px rgba(255, 255, 255, 0.1);
+        transform: translateY(0) scale(1);
+        transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+      }
+      .setup-modal.hidden .modal-content {
+        transform: translateY(30px) scale(0.95);
+      }
+      .modal-header {
+        text-align: center;
+        margin-bottom: 20px;
+        flex-shrink: 0;
+      }
+      .modal-header h2 {
+        font-size: clamp(22px, 4vw, 30px);
+        font-weight: 900;
+        color: var(--green-dark);
+        margin-bottom: 8px;
+      }
+      .modal-header p {
+        color: var(--text-muted);
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .modal-courses-scroll {
+        overflow-y: auto;
+        flex: 1;
+        padding: 10px;
+      }
+      .modal-courses-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .modal-courses-scroll::-webkit-scrollbar-track {
+        background: var(--bg);
+        border-radius: 10px;
+      }
+      .modal-courses-scroll::-webkit-scrollbar-thumb {
+        background: var(--green-border);
+        border-radius: 10px;
+      }
+      .modal-courses-scroll::-webkit-scrollbar-thumb:hover {
+        background: var(--green-main);
+      }
+
+      .bg-shape {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 300px;
+        background: linear-gradient(135deg, #4a7c2e 0%, #2e5219 100%);
+        border-radius: 0 0 40px 40px;
+        z-index: 0;
+        transition: height 0.3s ease;
+      }
+
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+      }
+      header {
+        padding: 30px 10px 20px;
+        color: #fff;
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .badge-bothor {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        padding: 6px 16px;
+        border-radius: 99px;
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .academy-tag {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+      }
+      .header-main {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+      }
+      h1 {
+        font-size: clamp(26px, 5vw, 36px);
+        font-weight: 900;
+        line-height: 1.2;
+        margin-bottom: 4px;
+      }
+      .hero-desc {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.85);
+        margin-top: 8px;
+        max-width: 520px;
+      }
+
+      .deadline-card {
+        background: #ffffff;
+        color: var(--text-dark);
+        padding: 14px 22px;
+        border-radius: var(--radius-md);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-subtle);
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+      .deadline-card:hover {
+        transform: translateY(-5px);
+      }
+      .deadline-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--brown-main);
+      }
+      .deadline-val {
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--green-main);
+      }
+
+      .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin: 25px 0;
+        animation: fadeInUp 0.7s ease-out forwards;
+      }
+      .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(74, 124, 46, 0.04);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(74, 124, 46, 0.1);
+      }
+      .stat-card.primary {
+        background: linear-gradient(135deg, #f0f7ec 0%, #ffffff 100%);
+        border-color: var(--green-border);
+      }
+      .stat-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-muted);
+      }
+      .stat-num {
+        font-size: 36px;
+        font-weight: 900;
+        color: var(--green-main);
+        margin: 4px 0;
+      }
+      .stat-card.primary .stat-num {
+        color: var(--brown-main);
+      }
+
+      .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        background: var(--surface);
+        padding: 12px 18px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        animation: fadeInUp 0.8s ease-out forwards;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .action-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .action-bar-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn-outline {
+        border: 1px solid var(--green-main);
+        background: transparent;
+        color: var(--green-main);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .btn-outline:hover {
+        background: var(--green-light);
+        transform: scale(1.02);
+      }
+
+      .btn-share {
+        border: none;
+        background: linear-gradient(135deg, #7b4b2a 0%, #5c3620 100%);
+        color: #fff;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13.5px;
+        box-shadow: 0 4px 12px rgba(123, 75, 42, 0.3);
+      }
+      .btn-share:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 16px rgba(123, 75, 42, 0.45);
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 32px 0 16px;
+        animation: fadeInUp 0.9s ease-out forwards;
+      }
+      .section-title {
+        font-size: 20px;
+        font-weight: 900;
+        color: var(--text-dark);
+      }
+
+      .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+        gap: 18px;
+      }
+      .course-card {
+        position: relative;
+        overflow: hidden;
+        background: var(--bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+      .course-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--brown-main);
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform 0.3s ease-in-out;
+      }
+      .course-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(74, 124, 46, 0.09);
+        border-color: var(--green-border);
+        background: var(--surface);
+      }
+      .course-card:hover::before {
+        transform: scaleY(1);
+      }
+      .course-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 12px;
+      }
+      .course-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--green-dark);
+      }
+      .course-counter {
+        font-size: 12px;
+        font-weight: 800;
+        background: var(--green-light);
+        color: var(--green-main);
+        padding: 2px 8px;
+        border-radius: 99px;
+        transition: background 0.3s;
+      }
+
+      .lesson-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 10px;
+        margin-bottom: 6px;
+        border-radius: 8px;
+        background: var(--surface);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.2s ease;
+        user-select: none;
+        border: 1px solid transparent;
+      }
+      .lesson-row:hover {
+        background: var(--green-light);
+        border-color: var(--green-border);
+      }
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--green-main);
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        margin: 0;
+      }
+      input[type="checkbox"]:checked {
+        transform: scale(1.2);
+      }
+      .checked-text {
+        text-decoration: line-through;
+        opacity: 0.45;
+      }
+
+      .btn-generate {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 400px;
+        margin: 20px auto 10px;
+        background: linear-gradient(135deg, #4a7c2e 0%, #2e5219 100%);
+        color: #fff;
+        border: none;
+        padding: 18px 28px;
+        border-radius: var(--radius-md);
+        flex-shrink: 0;
+        font-size: 19px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(74, 124, 46, 0.4);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .btn-generate:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 30px rgba(74, 124, 46, 0.6);
+      }
+
+      .plan-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+      }
+
+      .day-box {
+        background: var(--surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      .day-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(74, 124, 46, 0.08);
+        border-color: var(--green-border);
+      }
+
+      .day-box-header {
+        background: var(--green-main);
+        color: #fff;
+        padding: 12px 16px;
+        font-weight: 800;
+        font-size: 15px;
+        text-align: center;
+        transition: background 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .day-box-body {
+        padding: 25px 16px 16px;
+      }
+
+      .day-box.active-day {
+        border: 2px solid var(--brown-main);
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(123, 75, 42, 0.2);
+      }
+      .day-box.active-day:hover {
+        transform: scale(1.02) translateY(-3px);
+      }
+      .day-box.active-day .day-box-header {
+        background: linear-gradient(135deg, #7b4b2a 0%, #5c3620 100%);
+      }
+      .today-badge {
+        background: #fff;
+        color: var(--brown-main);
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin-right: 8px;
+        font-weight: 900;
+      }
+
+      .day-box.completed-day {
+        border: 2px solid var(--success-main);
+        background: var(--success-light);
+        transform: scale(1.01);
+        box-shadow: 0 8px 25px rgba(74, 124, 46, 0.15);
+      }
+      .day-box.completed-day:hover {
+        transform: scale(1.01) translateY(-3px);
+        border-color: #2e5219;
+      }
+      .day-box.completed-day .day-box-header {
+        background: linear-gradient(135deg, #4a7c2e 0%, #2e5219 100%);
+      }
+      .completed-badge {
+        background: #fff;
+        color: var(--success-main);
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin-right: 8px;
+        font-weight: 900;
+      }
+      .day-box.completed-day .task-item {
+        background: #fff;
+        border-color: #c8ddb8;
+        opacity: 0.75;
+      }
+
+      @keyframes dayCompleteAnim {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(74, 124, 46, 0.7);
+        }
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 30px 10px rgba(74, 124, 46, 0.4);
+          border-color: var(--success-main);
+        }
+        100% {
+          transform: scale(1.01);
+          box-shadow: 0 8px 25px rgba(74, 124, 46, 0.15);
+        }
+      }
+      .day-completed-celebration {
+        animation: dayCompleteAnim 0.8s ease-out;
+      }
+
+      .task-item {
+        display: block;
+        background: var(--brown-light);
+        border: 1px solid rgba(123, 75, 42, 0.3);
+        padding: 14px 16px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        cursor: pointer;
+        user-select: none;
+        transition:
+          transform 0.1s ease,
+          background 0.2s;
+      }
+      .task-item:hover {
+        background: #e8dbd0;
+      }
+      .task-item:active {
+        transform: scale(0.97);
+      }
+      .task-tag {
+        font-size: 11px;
+        font-weight: 800;
+        color: #7b4b2a;
+        margin-bottom: 4px;
+      }
+      .task-name {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text-dark);
+        transition: all 0.2s;
+      }
+
+      .empty-state {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 40px 20px;
+        background: var(--surface);
+        border-radius: var(--radius-md);
+        border: 2px dashed var(--border-subtle);
+        color: var(--text-muted);
+        font-weight: 700;
+      }
+
+      .confetti {
+        position: fixed;
+        top: -10px;
+        z-index: 99999;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        animation: fall linear forwards;
+      }
+      @keyframes fall {
+        to {
+          transform: translateY(100vh) rotate(720deg);
+        }
+      }
+
+      /* ========== نافذة المشاركة ========== */
+      .share-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 100002;
+        background: rgba(30, 20, 10, 0.85);
+        backdrop-filter: blur(15px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        opacity: 1;
+        transition: opacity 0.4s ease;
+      }
+      .share-modal.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .share-content {
+        background: var(--surface);
+        width: 100%;
+        max-width: 520px;
+        max-height: 92vh;
+        border-radius: var(--radius-lg);
+        padding: 25px;
+        overflow-y: auto;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        transform: translateY(0) scale(1);
+        transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .share-modal.hidden .share-content {
+        transform: translateY(30px) scale(0.95);
+      }
+      .share-header {
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      .share-header h3 {
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--green-dark);
+        margin-bottom: 6px;
+      }
+      .share-header p {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .share-card-preview {
+        background: linear-gradient(135deg, #4a7c2e 0%, #2e5219 100%);
+        border-radius: var(--radius-md);
+        padding: 22px;
+        color: #fff;
+        margin-bottom: 18px;
+        box-shadow: 0 10px 30px rgba(74, 124, 46, 0.3);
+      }
+      .share-card-brand {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .share-card-brand .brand-name {
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: 1px;
+      }
+      .share-card-brand .brand-tag {
+        font-size: 11px;
+        opacity: 0.85;
+        font-weight: 600;
+      }
+      .share-card-title {
+        font-size: 15px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        opacity: 0.95;
+      }
+      .share-card-pct {
+        font-size: 42px;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+      .share-card-bar-wrap {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 99px;
+        height: 10px;
+        overflow: hidden;
+        margin-bottom: 15px;
+      }
+      .share-card-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #f5ede6, #c8ddb8);
+        border-radius: 99px;
+        transition: width 0.5s ease;
+      }
+      .share-card-stats {
+        font-size: 12.5px;
+        opacity: 0.9;
+        margin-bottom: 12px;
+        font-weight: 700;
+      }
+      .share-card-courses {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 12px;
+      }
+      .share-card-course-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+      }
+      .share-card-footer {
+        font-size: 10.5px;
+        opacity: 0.75;
+        margin-top: 12px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      .share-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .share-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 13px 18px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 14.5px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+      .share-btn-primary {
+        background: linear-gradient(135deg, #4a7c2e 0%, #2e5219 100%);
+        color: #fff;
+        box-shadow: 0 5px 15px rgba(74, 124, 46, 0.35);
+      }
+      .share-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(74, 124, 46, 0.5);
+      }
+      .share-btn-brown {
+        background: linear-gradient(135deg, #7b4b2a 0%, #5c3620 100%);
+        color: #fff;
+        box-shadow: 0 5px 15px rgba(123, 75, 42, 0.35);
+      }
+      .share-btn-brown:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(123, 75, 42, 0.5);
+      }
+      .share-btn-ghost {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border-subtle);
+      }
+      .share-btn-ghost:hover {
+        background: var(--bg);
+      }
+
+      .share-hint {
+        font-size: 11.5px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 10px;
+        font-weight: 600;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 768px) {
+        .header-main {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 15px;
+          text-align: center;
+        }
+        .hero-desc {
+          max-width: 100%;
+          margin: 10px auto;
+        }
+        .deadline-card {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px;
+          text-align: right;
+        }
+        .deadline-label,
+        .deadline-val,
+        .deadline-card > div:last-child {
+          margin: 0;
+        }
+        .deadline-val {
+          font-size: 20px;
+        }
+        .bg-shape {
+          height: 400px;
+        }
+
+        .stats-container {
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        .stat-card {
+          padding: 16px 12px;
+          text-align: center;
+          align-items: center;
+        }
+        .stat-num {
+          font-size: 28px;
+        }
+
+        .action-bar {
+          flex-direction: column;
+          text-align: center;
+        }
+        .action-bar-right,
+        .action-bar-actions {
+          justify-content: center;
+          width: 100%;
+        }
+        .btn-outline,
+        .btn-share {
+          width: 100%;
+          justify-content: center;
+        }
+        .modal-content {
+          padding: 24px 16px;
+        }
+        .modal-header h2 {
+          font-size: 24px;
+        }
+        .toast {
+          font-size: 14px;
+          padding: 12px 20px;
+          width: 90%;
+        }
+      }
+      @media (max-width: 480px) {
+        .bg-shape {
+          height: 420px;
+        }
+        .deadline-card {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 5px;
+        }
+        .share-card-pct {
+          font-size: 36px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div
+      id="campCompletedModal"
+      class="setup-modal hidden"
+      style="z-index: 100001"
+    >
+      <div
+        class="modal-content"
+        style="text-align: center; max-width: 500px; padding: 50px 30px"
+      >
+        <h2
+          style="
+            color: var(--brown-main);
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 15px;
+          "
+        >
+          🌳 جذورك أثمرت!
+        </h2>
+        <p
+          style="
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.6;
+            margin-bottom: 30px;
+          "
+        >
+          ما شاء الله تبارك الله! من سار على الدرب وصل، وقد وصلت بجدارة. لقد
+          أنهيت مخيّم الاستدراك، وأثبتّ أنك من الجيل الصاعد مبارك عليك!
+        </p>
+        <button
+          class="btn-generate"
+          style="margin: 0 auto; max-width: 200px"
+          onclick="
+            document
+              .getElementById('campCompletedModal')
+              .classList.add('hidden')
+          "
+        >
+          رائع! إغلاق
+        </button>
+      </div>
+    </div>
+
+    <!-- نافذة المشاركة -->
+    <div id="shareModal" class="share-modal hidden">
+      <div class="share-content">
+        <div class="share-header">
+          <h3>🌳 شارك إنجازك</h3>
+          <p>شارك تقدمك مع زملائك لتحفيزهم — فالدال على الخير كفاعله</p>
+        </div>
+
+        <div class="share-card-preview">
+          <div class="share-card-brand">
+            <div class="brand-name">جذور</div>
+            <div class="brand-tag">أكاديمية الجيل الصاعد</div>
+          </div>
+          <div class="share-card-title">مخيّم الاستدراك — إنجازي حتى الآن</div>
+          <div class="share-card-pct" id="share-pct">0%</div>
+          <div class="share-card-bar-wrap">
+            <div class="share-card-bar" id="share-bar" style="width: 0%"></div>
+          </div>
+          <div class="share-card-stats" id="share-stats">0 من 0 مقرر</div>
+          <div class="share-card-courses" id="share-courses"></div>
+          <div class="share-card-footer" id="share-footer"></div>
+        </div>
+
+        <div class="share-actions">
+          <button
+            class="share-btn share-btn-primary"
+            onclick="shareViaWebAPI()"
+          >
+            📤 مشاركة مباشرة
+          </button>
+          <button
+            class="share-btn share-btn-brown"
+            onclick="downloadShareImage()"
+          >
+            🖼️ تحميل كصورة PNG
+          </button>
+          <button class="share-btn share-btn-ghost" onclick="copyShareText()">
+            📋 نسخ النص
+          </button>
+          <button class="share-btn share-btn-ghost" onclick="closeShareModal()">
+            إغلاق
+          </button>
+        </div>
+        <div class="share-hint">
+          💡 إذا لم تظهر خيارات المشاركة، انسخ النص والصقه في واتساب أو تيليجرام
+        </div>
+      </div>
+    </div>
+
+    <div id="setupModal" class="setup-modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>المقررات واللقاءات التي أنهيتها حتى الآن</h2>
+          <p>حدد ما قمت بإنجازه بدقة لنقوم ببرمجة جدول استدراك يومي مخصص لك</p>
+        </div>
+        <div class="modal-courses-scroll">
+          <div class="courses-grid" id="modal-courses-container"></div>
+        </div>
+        <button class="btn-generate" onclick="generatePlan()">
+          توليد وتوزيع الجدول
+        </button>
+      </div>
+    </div>
+
+    <div id="screenGlow" class="screen-glow"></div>
+    <div class="bg-shape"></div>
+
+    <div class="container">
+      <header>
+        <div class="top-bar">
+          <div class="badge-bothor">جذور</div>
+          <div class="academy-tag">أكاديمية الجيل الصاعد</div>
+        </div>
+        <div class="header-main">
+          <div>
+            <h1>مخيّم الاستدراك</h1>
+            <p class="hero-desc">
+              خطة يومية لتوزيع ومتابعة جميع المقررات حتى ختام المخيّم.
+            </p>
+          </div>
+          <div class="deadline-card">
+            <div class="deadline-label">نهاية المخيّم</div>
+            <div class="deadline-val">الإثنين القادم</div>
+            <div
+              style="
+                font-size: 11.5px;
+                color: var(--text-muted);
+                font-weight: 600;
+              "
+            >
+              8 أيام متتالية
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="stats-container">
+        <div class="stat-card primary">
+          <div class="stat-title">نسبة الإنجاز الإجمالية</div>
+          <div class="stat-num" id="stat-pct">0%</div>
+          <div
+            style="font-size: 12px; color: var(--green-main); font-weight: 700"
+          >
+            يتم الحفظ تلقائياً
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">الدروس المكتملة</div>
+          <div class="stat-num" id="stat-done">0</div>
+          <div class="stat-title">درساً منجزاً</div>
+        </div>
+        <div class="stat-card" style="grid-column: span 1">
+          <div class="stat-title">المتبقي حتى نهاية المخيّم</div>
+          <div class="stat-num" id="stat-rem">0</div>
+          <div class="stat-title">درساً مطلوباً</div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-bar-right">
+          <span
+            id="period-text"
+            style="
+              font-size: 13.5px;
+              font-weight: 700;
+              color: var(--text-muted);
+            "
+            >فترة المخيّم: من الإثنين حتى الإثنين القادم (8 أيام)</span
+          >
+        </div>
+        <div class="action-bar-actions">
+          <button class="btn-share" onclick="openShareModal()">
+            🌳 شارك إنجازك
+          </button>
+          <button class="btn-outline" onclick="openModal()">
+            تعديل المقررات المنجزة
+          </button>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">جدول الاستدراك اليومي الخاص بك</div>
+      </div>
+
+      <div class="plan-grid" id="plan-container"></div>
+    </div>
+
+    <script>
+      // 8 أيام: من الإثنين حتى الإثنين القادم
+      const ALL_DAYS = [
+        { d: "1", name: "الإثنين (اليوم)" },
+        { d: "2", name: "الثلاثاء" },
+        { d: "3", name: "الأربعاء" },
+        { d: "4", name: "الخميس" },
+        { d: "5", name: "الجمعة" },
+        { d: "6", name: "السبت" },
+        { d: "7", name: "الأحد" },
+        { d: "8", name: "الإثنين القادم" },
+      ];
+
+      const COURSES = [
+        {
+          id: "prophetic_day",
+          name: "كتاب اليوم النبوي",
+          items: [
+            { id: "pd_1", label: "المقرر الأول" },
+            { id: "pd_2", label: "المقرر الثاني" },
+            { id: "pd_3", label: "المقرر الثالث" },
+            { id: "pd_4", label: "المقرر الرابع" },
+            { id: "pd_5", label: "المقرر الخامس" },
+            { id: "pd_6", label: "المقرر السادس" },
+            { id: "pd_7", label: "المقرر السابع" },
+            { id: "pd_8", label: "المقرر الثامن" },
+          ],
+        },
+        {
+          id: "best_manners",
+          name: "أحاسنكم أخلاقًا",
+          items: [
+            { id: "bm_5", label: "المحاضرة الخامسة" },
+            { id: "bm_6", label: "المحاضرة السادسة" },
+            { id: "bm_7", label: "المحاضرة السابعة" },
+          ],
+        },
+        {
+          id: "creed_basics",
+          name: "لبنات العقيدة",
+          items: [
+            { id: "cb_5", label: "المحاضرة الخامسة" },
+            { id: "cb_6", label: "المحاضرة السادسة" },
+            { id: "cb_7", label: "المحاضرة السابعة" },
+            { id: "cb_8", label: "المحاضرة الثامنة" },
+            { id: "cb_9", label: "المحاضرة التاسعة" },
+            { id: "cb_10", label: "المحاضرة العاشرة" },
+          ],
+        },
+        {
+          id: "culture_abc",
+          name: "أبجديات الثقافة (العهد المدني)",
+          items: [
+            { id: "ca_1", label: "المحاضرة الأولى" },
+            { id: "ca_2", label: "المحاضرة الثانية" },
+            { id: "ca_3", label: "المحاضرة الثالثة" },
+            { id: "ca_4", label: "المحاضرة الرابعة" },
+            { id: "ca_5", label: "المحاضرة الخامسة" },
+            { id: "ca_6", label: "المحاضرة السادسة" },
+            { id: "ca_7", label: "المحاضرة السابعة" },
+            { id: "ca_8", label: "المحاضرة الثامنة" },
+            { id: "ca_9", label: "المحاضرة التاسعة" },
+            { id: "ca_10", label: "المحاضرة العاشرة" },
+            { id: "ca_11", label: "المحاضرة الحادية عشرة" },
+          ],
+        },
+      ];
+
+      let state = {
+        done: JSON.parse(localStorage.getItem("jothor_done_items") || "{}"),
+        plan: JSON.parse(localStorage.getItem("jothor_saved_plan") || "null"),
+      };
+
+      function showToast(message) {
+        const container = document.getElementById("toastContainer");
+        container.innerHTML = "";
+
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = message;
+        container.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 7500);
+      }
+
+      function openModal() {
+        document.getElementById("setupModal").classList.remove("hidden");
+      }
+      function closeModal() {
+        document.getElementById("setupModal").classList.add("hidden");
+      }
+
+      function initCoursesModal() {
+        const container = document.getElementById("modal-courses-container");
+        container.innerHTML = "";
+        COURSES.forEach((course) => {
+          const card = document.createElement("div");
+          card.className = "course-card";
+          const cDone = course.items.filter((i) => state.done[i.id]).length;
+          card.innerHTML = `
+          <div class="course-top">
+            <span class="course-title">${course.name}</span>
+            <span class="course-counter" id="modal-counter-${course.id}">${cDone}/${course.items.length}</span>
+          </div>
+        `;
+          course.items.forEach((item) => {
+            const isDone = !!state.done[item.id];
+            const label = document.createElement("label");
+            label.className = "lesson-row";
+            label.innerHTML = `
+            <input type="checkbox" id="modal-chk-${item.id}" ${isDone ? "checked" : ""} onchange="toggleItem('${item.id}')">
+            <span id="modal-text-${item.id}" class="${isDone ? "checked-text" : ""}">${item.label}</span>
+          `;
+            card.appendChild(label);
+          });
+          container.appendChild(card);
+        });
+        updateStatsUI();
+
+        if (!state.plan) {
+          document.getElementById("plan-container").innerHTML = `
+          <div class="empty-state">
+            لم تقم بتوليد جدول بعد. يرجى تعديل المقررات المنجزة من الزر بالأعلى لتوليد الجدول وتوزيعه.
+          </div>`;
+        } else {
+          renderPlanGrid();
+        }
+      }
+
+      function updateStatsUI() {
+        let total = 0,
+          doneCount = 0;
+        COURSES.forEach((course) => {
+          const cDone = course.items.filter((i) => state.done[i.id]).length;
+          total += course.items.length;
+          doneCount += cDone;
+          const counterEl = document.getElementById(
+            `modal-counter-${course.id}`,
+          );
+          if (counterEl)
+            counterEl.innerText = `${cDone}/${course.items.length}`;
+        });
+        const rem = total - doneCount;
+        const pct = total ? Math.round((doneCount / total) * 100) : 0;
+
+        document.getElementById("stat-pct").innerText = pct + "%";
+        document.getElementById("stat-done").innerText = doneCount;
+        document.getElementById("stat-rem").innerText = rem;
+      }
+
+      function triggerScreenGlow() {
+        const glowEl = document.getElementById("screenGlow");
+        glowEl.classList.remove("active");
+        void glowEl.offsetWidth;
+        glowEl.classList.add("active");
+      }
+
+      function fireConfetti() {
+        const colors = ["#4A7C2E", "#7B4B2A", "#EAF2E3", "#C8DDB8", "#F5EDE6"];
+        for (let i = 0; i < 70; i++) {
+          let conf = document.createElement("div");
+          conf.className = "confetti";
+          conf.style.left = Math.random() * 100 + "vw";
+          conf.style.backgroundColor =
+            colors[Math.floor(Math.random() * colors.length)];
+          conf.style.animationDuration = Math.random() * 2 + 1.5 + "s";
+          conf.style.animationDelay = Math.random() * 0.5 + "s";
+          document.body.appendChild(conf);
+          setTimeout(() => conf.remove(), 4000);
+        }
+      }
+
+      function showCampCompleted() {
+        document
+          .getElementById("campCompletedModal")
+          .classList.remove("hidden");
+        const end = Date.now() + 3500;
+        const interval = setInterval(function () {
+          if (Date.now() > end) return clearInterval(interval);
+          fireConfetti();
+        }, 300);
+      }
+
+      function checkCourseCompletion(courseId) {
+        const course = COURSES.find((c) => c.id === courseId);
+        if (!course) return false;
+        return course.items.every((it) => state.done[it.id]);
+      }
+
+      function wasCourseCompletedBefore(courseId, doneSnapshot) {
+        const course = COURSES.find((c) => c.id === courseId);
+        if (!course) return false;
+        return course.items.every((it) => doneSnapshot[it.id]);
+      }
+
+      function toggleItem(id) {
+        if (!state.plan) return;
+
+        const doneBefore = JSON.parse(JSON.stringify(state.done));
+
+        const isCampDoneBefore = COURSES.every((c) =>
+          c.items.every((it) => doneBefore[it.id]),
+        );
+        const daysDoneBefore = state.plan.map(
+          (day) =>
+            day.items.length > 0 && day.items.every((it) => doneBefore[it.id]),
+        );
+
+        const dayOfMonth = new Date().getDate();
+        const todayIndex = state.plan.findIndex(
+          (d) => d.dayId === String(dayOfMonth),
+        );
+
+        if (state.done[id]) {
+          delete state.done[id];
+        } else {
+          state.done[id] = true;
+          triggerScreenGlow();
+        }
+        localStorage.setItem("jothor_done_items", JSON.stringify(state.done));
+
+        const modalChk = document.getElementById(`modal-chk-${id}`);
+        const modalText = document.getElementById(`modal-text-${id}`);
+        if (modalChk) modalChk.checked = !!state.done[id];
+        if (modalText) {
+          if (state.done[id]) modalText.classList.add("checked-text");
+          else modalText.classList.remove("checked-text");
+        }
+
+        updateStatsUI();
+
+        const isCampDoneAfter = COURSES.every((c) =>
+          c.items.every((it) => state.done[it.id]),
+        );
+        const daysDoneAfter = state.plan.map(
+          (day) =>
+            day.items.length > 0 && day.items.every((it) => state.done[it.id]),
+        );
+        const targetDayIndex = state.plan.findIndex((day) =>
+          day.items.some((it) => it.id === id),
+        );
+
+        if (state.plan) {
+          renderPlanGrid();
+
+          if (state.done[id]) {
+            if (!isCampDoneBefore && isCampDoneAfter) {
+              showCampCompleted();
+              return;
+            }
+
+            const targetItem = COURSES.flatMap((c) => c.items).find(
+              (it) => it.id === id,
+            );
+            if (targetItem) {
+              const parentCourse = COURSES.find((c) =>
+                c.items.some((it) => it.id === id),
+              );
+              if (parentCourse) {
+                const wasCompleted = wasCourseCompletedBefore(
+                  parentCourse.id,
+                  doneBefore,
+                );
+                const isCompletedNow = checkCourseCompletion(parentCourse.id);
+                if (!wasCompleted && isCompletedNow) {
+                  fireConfetti();
+                  showToast(
+                    `🌳 ما شاء الله! أتممت مقرر «${parentCourse.name}» بالكامل — جذورك تثمر! 🎉`,
+                  );
+                }
+              }
+            }
+
+            if (
+              !daysDoneBefore[targetDayIndex] &&
+              daysDoneAfter[targetDayIndex]
+            ) {
+              fireConfetti();
+
+              const dayElement = document.getElementById(
+                `daybox-${state.plan[targetDayIndex].dayId}`,
+              );
+              if (dayElement) {
+                dayElement.classList.remove("day-completed-celebration");
+                void dayElement.offsetWidth;
+                dayElement.classList.add("day-completed-celebration");
+              }
+
+              if (todayIndex !== -1 && targetDayIndex > todayIndex) {
+                showToast(
+                  "اللهم باارك 🔥 أنت من جذور متميز أنهيت مقرر إضافي من مقررات اليوم التالي 🧡",
+                );
+              } else {
+                showToast(" أنت من جذور متميز 🌹 بارك الله فيك 🎉");
+              }
+            }
+          }
+        }
+      }
+
+      function generatePlan(close = true) {
+        const numDays = ALL_DAYS.length;
+
+        const courseQueues = COURSES.map((c) => ({
+          courseId: c.id,
+          courseName: c.name,
+          items: c.items
+            .filter((it) => !state.done[it.id])
+            .map((it) => ({
+              id: it.id,
+              course: c.name,
+              courseId: c.id,
+              label: it.label,
+            })),
+        }));
+
+        const totalItems = courseQueues.reduce(
+          (sum, c) => sum + c.items.length,
+          0,
+        );
+
+        if (totalItems === 0) {
+          if (close) alert("أنت حقاً متميز، لقد أنهيت جميع المقررات!");
+          state.plan = [];
+        } else {
+          const masterList = [];
+          let itemsRemaining = true;
+
+          while (itemsRemaining) {
+            itemsRemaining = false;
+            for (let i = 0; i < courseQueues.length; i++) {
+              if (courseQueues[i].items.length > 0) {
+                masterList.push(courseQueues[i].items.shift());
+                itemsRemaining = true;
+              }
+            }
+          }
+
+          const daysDistribution = Array.from({ length: numDays }, () => []);
+
+          const baseCount = Math.floor(totalItems / numDays);
+          const remainder = totalItems % numDays;
+
+          let currentIndex = 0;
+          for (let d = 0; d < numDays; d++) {
+            let itemsForThisDay = baseCount + (d < remainder ? 1 : 0);
+            for (let k = 0; k < itemsForThisDay; k++) {
+              if (currentIndex < masterList.length) {
+                daysDistribution[d].push(masterList[currentIndex++]);
+              }
+            }
+          }
+
+          const newPlan = [];
+          ALL_DAYS.forEach((day, index) => {
+            newPlan.push({ dayId: day.d, items: daysDistribution[index] });
+          });
+          state.plan = newPlan;
+        }
+
+        localStorage.setItem("jothor_saved_plan", JSON.stringify(state.plan));
+        renderPlanGrid();
+        if (close) closeModal();
+      }
+
+      function renderPlanGrid() {
+        const container = document.getElementById("plan-container");
+        container.innerHTML = "";
+
+        if (!state.plan || state.plan.length === 0) {
+          container.innerHTML = `
+          <div class="empty-state" style="border-color: var(--brown-main); background: var(--brown-light); color: var(--brown-main);">
+            لا يوجد مهام متبقية.. راحة واستدراك بالكامل!
+          </div>`;
+          return;
+        }
+
+        const todayDate = new Date().getDate().toString();
+
+        state.plan.forEach((planDay) => {
+          const dayMeta = ALL_DAYS.find((d) => d.d === planDay.dayId);
+          if (!dayMeta) return;
+
+          const isToday = dayMeta.d === todayDate;
+          const isDayFullyDone =
+            planDay.items.length > 0 &&
+            planDay.items.every((it) => state.done[it.id]);
+
+          const card = document.createElement("div");
+          card.id = `daybox-${planDay.dayId}`;
+
+          if (isDayFullyDone) {
+            card.className = "day-box completed-day";
+          } else {
+            card.className = "day-box" + (isToday ? " active-day" : "");
+          }
+
+          let itemsHtml = planDay.items
+            .map((it) => {
+              const isDone = !!state.done[it.id];
+              return `
+            <label class="task-item">
+              <div class="task-tag">${it.course}</div>
+              <div style="display:flex; align-items:center; gap:10px; margin-top:4px;">
+                <input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleItem('${it.id}')">
+                <div class="task-name ${isDone ? "checked-text" : ""}">${it.label}</div>
+              </div>
+            </label>
+          `;
+            })
+            .join("");
+
+          if (planDay.items.length === 0) {
+            itemsHtml =
+              '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding:12px 0;">مهام هذا اليوم مكتملة</div>';
+          }
+
+          let badgeHtml = "";
+          if (isDayFullyDone) {
+            badgeHtml = '<span class="completed-badge">أحسنت يا متميز </span>';
+          } else if (isToday) {
+            badgeHtml = '<span class="today-badge">مهام اليوم</span>';
+          }
+
+          card.innerHTML = `
+          <div class="day-box-header">
+            <span>${dayMeta.name}</span>
+            ${badgeHtml}
+          </div>
+          <div class="day-box-body">${itemsHtml}</div>
+        `;
+          container.appendChild(card);
+        });
+      }
+
+      /* ============ دوال المشاركة ============ */
+      function getShareStats() {
+        let total = 0,
+          doneCount = 0;
+        const courseStats = COURSES.map((course) => {
+          const cDone = course.items.filter((i) => state.done[i.id]).length;
+          total += course.items.length;
+          doneCount += cDone;
+          return { name: course.name, done: cDone, total: course.items.length };
+        });
+        const pct = total ? Math.round((doneCount / total) * 100) : 0;
+        return { total, doneCount, pct, courseStats };
+      }
+
+      function buildShareText() {
+        const s = getShareStats();
+        const date = new Date().toLocaleDateString("ar-EG", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        let lines = [];
+        lines.push("🌳 إنجازي في مخيّم الاستدراك — جذور");
+        lines.push("━━━━━━━━━━━━━━━");
+        lines.push(`📊 نسبة الإنجاز: ${s.pct}%`);
+        lines.push(`✅ أكملت ${s.doneCount} من ${s.total} مقرراً`);
+        lines.push("");
+        lines.push("📚 التفاصيل:");
+        s.courseStats.forEach((c) => {
+          const bar = c.done === c.total ? "✔️" : "🔄";
+          lines.push(`  ${bar} ${c.name}: ${c.done}/${c.total}`);
+        });
+        lines.push("");
+        lines.push(`🗓️ ${date}`);
+        lines.push("أكاديمية الجيل الصاعد — جذور 🌱");
+        lines.push("");
+        lines.push("اللهم بارك! من سار على الدرب وصل 🌟");
+        return lines.join("\n");
+      }
+
+      function updateSharePreview() {
+        const s = getShareStats();
+        document.getElementById("share-pct").innerText = s.pct + "%";
+        document.getElementById("share-bar").style.width = s.pct + "%";
+        document.getElementById("share-stats").innerText =
+          `${s.doneCount} من ${s.total} مقرر — وفقك الله`;
+
+        const coursesEl = document.getElementById("share-courses");
+        coursesEl.innerHTML = s.courseStats
+          .map((c) => {
+            const bar = c.done === c.total ? "✔️" : "🔄";
+            return `<div class="share-card-course-row"><span>${bar} ${c.name}</span><span>${c.done}/${c.total}</span></div>`;
+          })
+          .join("");
+
+        const date = new Date().toLocaleDateString("ar-EG", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        document.getElementById("share-footer").innerText =
+          `${date} — أكاديمية الجيل الصاعد`;
+      }
+
+      function openShareModal() {
+        if (!state.plan) {
+          showToast("⚠️ قم بتوليد الجدول أولاً لمشاركة إنجازك");
+          return;
+        }
+        updateSharePreview();
+        document.getElementById("shareModal").classList.remove("hidden");
+      }
+
+      function closeShareModal() {
+        document.getElementById("shareModal").classList.add("hidden");
+      }
+
+      function copyShareText() {
+        const text = buildShareText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              showToast("📋 تم نسخ نص الإنجاز — الصقه في أي محادثة");
+            })
+            .catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+      }
+
+      function fallbackCopy(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          showToast("📋 تم نسخ نص الإنجاز");
+        } catch (e) {
+          showToast("⚠️ لم نتمكن من النسخ، انسخه يدوياً");
+        }
+        document.body.removeChild(ta);
+      }
+
+      function shareViaWebAPI() {
+        const text = buildShareText();
+        if (navigator.share) {
+          navigator
+            .share({
+              title: "إنجازي في مخيّم الاستدراك — جذور",
+              text: text,
+            })
+            .then(() => {
+              showToast("🌳 بارك الله فيك، تمت المشاركة");
+            })
+            .catch((err) => {
+              if (err.name !== "AbortError") {
+                copyShareText();
+              }
+            });
+        } else {
+          copyShareText();
+          showToast("📋 تم نسخ النص — جهازك لا يدعم المشاركة المباشرة");
+        }
+      }
+
+      function downloadShareImage() {
+        const s = getShareStats();
+        const canvas = document.createElement("canvas");
+        const W = 900,
+          H = 1200;
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext("2d");
+
+        const grad = ctx.createLinearGradient(0, 0, W, H);
+        grad.addColorStop(0, "#4A7C2E");
+        grad.addColorStop(1, "#2E5219");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.06)";
+        ctx.lineWidth = 2;
+        for (let i = -H; i < W; i += 60) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i + H, H);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "rgba(245, 237, 230, 0.08)";
+        ctx.beginPath();
+        ctx.arc(W - 100, 120, 180, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(120, H - 150, 220, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#F5EDE6";
+        ctx.font = "900 90px Tajawal, sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText("جذور", W - 60, 140);
+
+        ctx.fillStyle = "rgba(245, 237, 230, 0.8)";
+        ctx.font = "600 22px Tajawal, sans-serif";
+        ctx.fillText("أكاديمية الجيل الصاعد", W - 60, 180);
+
+        ctx.strokeStyle = "rgba(245, 237, 230, 0.25)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(60, 220);
+        ctx.lineTo(W - 60, 220);
+        ctx.stroke();
+
+        ctx.fillStyle = "#F5EDE6";
+        ctx.font = "800 34px Tajawal, sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText("مخيّم الاستدراك — إنجازي", W - 60, 290);
+
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "900 130px Tajawal, sans-serif";
+        ctx.fillText(s.pct + "%", W - 60, 440);
+
+        ctx.fillStyle = "rgba(245, 237, 230, 0.9)";
+        ctx.font = "700 24px Tajawal, sans-serif";
+        ctx.fillText(`أكملت ${s.doneCount} من ${s.total} مقرراً`, W - 60, 490);
+
+        const barX = 60,
+          barY = 530,
+          barW = W - 120,
+          barH = 26;
+        ctx.fillStyle = "rgba(255,255,255,0.2)";
+        roundRect(ctx, barX, barY, barW, barH, 13);
+        ctx.fill();
+        ctx.fillStyle = "#F5EDE6";
+        roundRect(
+          ctx,
+          barX + barW - (barW * s.pct) / 100,
+          barY,
+          (barW * s.pct) / 100,
+          barH,
+          13,
+        );
+        ctx.fill();
+
+        let y = 630;
+        ctx.textAlign = "right";
+        s.courseStats.forEach((c) => {
+          ctx.fillStyle = "rgba(255,255,255,0.1)";
+          roundRect(ctx, 60, y - 32, W - 120, 60, 12);
+          ctx.fill();
+
+          ctx.fillStyle = "#FFFFFF";
+          ctx.font = "700 26px Tajawal, sans-serif";
+          const icon = c.done === c.total ? "✔" : "●";
+          ctx.fillText(`${icon} ${c.name}`, W - 100, y + 8);
+
+          ctx.fillStyle = "#F5EDE6";
+          ctx.font = "900 26px Tajawal, sans-serif";
+          ctx.textAlign = "left";
+          ctx.fillText(`${c.done}/${c.total}`, 100, y + 8);
+          ctx.textAlign = "right";
+
+          y += 80;
+        });
+
+        ctx.fillStyle = "rgba(245, 237, 230, 0.85)";
+        ctx.font = "600 22px Tajawal, sans-serif";
+        const date = new Date().toLocaleDateString("ar-EG", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        ctx.fillText(date, W - 60, H - 130);
+
+        ctx.fillStyle = "#F5EDE6";
+        ctx.font = "800 26px Tajawal, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🌱 من سار على الدرب وصل 🌱", W / 2, H - 70);
+
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `jothor-achievement-${Date.now()}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1500);
+          showToast("🖼️ تم تحميل بطاقة الإنجاز — شاركها مع زملائك");
+        }, "image/png");
+      }
+
+      function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      initCoursesModal();
+
+      if (!localStorage.getItem("jothor_is_first_visit")) {
+        openModal();
+        localStorage.setItem("jothor_is_first_visit", "true");
+      }
+    </script>
+  </body>
+</html>
